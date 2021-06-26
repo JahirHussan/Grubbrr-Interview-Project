@@ -79,9 +79,9 @@ namespace Grubbrr_Interview_Project.Controllers
                     string FileName = Path.GetFileNameWithoutExtension(invoiceDetailsViewModel.Image.ImageFile.FileName);
                     string FileExtension = Path.GetExtension(invoiceDetailsViewModel.Image.ImageFile.FileName);
                     FileName = DateTime.Now.ToString("yyyyMMdd") + "-" + FileName.Trim() + FileExtension;
-                    string UploadPath = @"C:\Users\jahir\source\repos\Grubbrr Interview Project\Grubbrr Interview Project\UserImage\";
+                    string UploadPath = Path.Combine(Server.MapPath("/UserImage"), FileName);
                     invoiceDetailsViewModel.Image.InvoiceDoucmentURL = UploadPath + FileName;
-                    invoiceDetailsViewModel.Image.ImageFile.SaveAs(invoiceDetailsViewModel.InvoiceList.InvoiceDoucmentURL);
+                    invoiceDetailsViewModel.Image.ImageFile.SaveAs(UploadPath);
                 }
                 await invoice.SaveInvoice(invoiceDetailsViewModel);           
 

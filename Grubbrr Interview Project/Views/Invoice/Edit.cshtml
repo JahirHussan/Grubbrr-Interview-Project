@@ -1,0 +1,283 @@
+﻿@model Grubbrr_Interview_Project.ViewModel.InvoiceDetailsViewModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Edit</title>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-3.3.1.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/fixedheader/3.1.9/js/dataTables.fixedHeader.min.js"></script>
+    <link href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/fixedheader/3.1.9/css/fixedHeader.dataTables.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <link href="~/Content/jquery-ui.css" rel="stylesheet" />
+
+    <script>
+        $(function () {
+            $(".datePicker").datepicker({
+                dateFormat: 'dd/mm/y',//check change
+                changeMonth: true,
+                changeYear: true
+            });
+            $("#txtInvoiceDate").datepicker({ dateFormat: "yy-mm-dd" }).datepicker("setDate", new Date());
+        });
+
+        $(document).ready(function () {
+            var rowIdx = 0;
+            $('#addBtn').on('click', function () {
+                $('#dynamictbody').append(`<tr id="R${++rowIdx}">
+
+                                    @foreach (var item in Model.InvoiceLists)
+                                    {
+                                        <tr role="row" class="odd" id="crow_@Html.DisplayFor(modelItem => item.ID)">
+                                            <td>
+                                               ${rowIdx}
+                                            </td>
+                                            <td>
+                                                @Html.DropDownListFor(model => item.ProductID, new SelectList(Model.Products, "ProductID", "ProductName"), new { @class = "form-control" })
+                                                @Html.ValidationMessageFor(model => item.ProductID, "", new { @class = "text-danger" })
+                                            </td>
+                                            <td>
+                                                @Html.TextBoxFor(modelItem => item.Description, new { @class = "form-control" })
+                                            </td>
+                                            <td>
+                                                @Html.TextBoxFor(modelItem => item.Price, new { @class = "form-control" })
+                                            </td>
+                                            <td>
+                                                @Html.TextBoxFor(modelItem => item.Quantity, new { @class = "form-control" })
+                                            </td>
+                                            <td>
+                                                @Html.TextBoxFor(modelItem => item.Tax, new { @class = "form-control" })
+                                            </td>
+                                            <td>
+                                                @((item.Price * item.Quantity).ToString("c"))
+                                                @*@Html.DisplayFor(modelItem => item.Price * item.Quantity)*@
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-danger remove" type="button">Remove</button>
+                                            </td>
+                                        </tr>
+                                             break;
+                                     }
+                                    </tr>`
+                );
+            });
+            $('#dynamictbody').on('click', '.remove', function () {
+                var child = $(this).closest('tr').nextAll();
+                child.each(function () {
+                    var id = $(this).attr('id');
+                    var idx = $(this).children('.row-index').children('p');
+                    var dig = parseInt(id.substring(1));
+                    idx.html(`Row ${dig - 1}`);
+                    $(this).attr('id', `R${dig - 1}`);
+                });
+                $(this).closest('tr').remove();
+                rowIdx--;
+            });
+
+            $('#invoiceListtable').DataTable({
+                "footerCallback": function (row, data, start, end, display) {
+                    var api = this.api(), data;
+
+                    // Remove the formatting to get integer data for summation
+                    var intVal = function (i) {
+                        return typeof i === 'string' ?
+                            i.replace(/[\$,]/g, '') * 1 :
+                            typeof i === 'number' ?
+                                i : 0;
+                    };
+
+                    // Total over all pages
+                    total = api
+                        .column(6)
+                        .data()
+                        .reduce(function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0);
+
+                    // Total over this page
+                    pageTotal = api
+                        .column(6, { page: 'current' })
+                        .data()
+                        .reduce(function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0);
+
+                    // Update footer
+                    $(api.column(4).footer()).html(
+                        '$' + pageTotal + ' ( $' + total + ' total)'
+                    );
+                }
+            });
+        });
+    </script>
+
+
+</head>
+<body>
+
+    <div class="container-fluid py-4">
+        <h4 class="text-center text-uppercase">Manage Invoice</h4>
+        @using (Html.BeginForm("Save", "Invoice", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card card-outline-primary">
+                        <div class="card-body">
+                            <div class="row" style="align-items:center;padding-bottom: 10px">
+                                <div class="col-md-3">
+                                    @Html.Label("Bill To")
+                                </div>
+                                <div class="col-md-3">
+                                    @Html.DropDownListFor(model => model.InvoiceInfo.CustomerID, new SelectList(Model.Customers, "CustomerID", "CustomerName"), new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.InvoiceInfo.CustomerID, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="row" style="align-items:center;padding-bottom: 10px">
+                                <div class="col-md-3">
+                                    @Html.Label("Invoice #")
+                                </div>
+                                <div class="col-md-3" style="align-items:center;padding-bottom: 10px">
+                                    @Html.TextBoxFor(model => model.InvoiceInfo.InvoiceNumber, new { @class = "form-control required" })
+                                    @Html.ValidationMessageFor(model => model.InvoiceInfo.InvoiceNumber, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="row" style="align-items:center;padding-bottom: 10px">
+                                <div class="col-md-3">
+                                    @Html.Label("Invoice Date")
+                                </div>
+                                <div class="col-md-3" style="align-items:center">
+                                    @Html.TextBoxFor(model => model.InvoiceInfo.InvoiceDate, new { @id = "txtInvoiceDate", @class = "form-control datePicker" })
+                                    @Html.ValidationMessageFor(model => model.InvoiceInfo.InvoiceDate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="row" style="align-items:center;padding-bottom: 10px">
+                                <div class="col-md-3">
+                                    @Html.Label("Due Date")
+                                </div>
+                                <div class="col-md-3">
+                                    @Html.TextBoxFor(model => model.InvoiceInfo.DueDate, new { @class = "form-control datePicker" })
+                                    @Html.ValidationMessageFor(model => model.InvoiceInfo.DueDate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="row" style="align-items:center;padding-bottom: 10px">
+                                <div class="col-md-3">
+                                    @Html.Label("Status")
+                                </div>
+                                <div class="col-md-3">
+                                    @Html.DropDownListFor(model => model.InvoiceInfo.StatusID, new SelectList(Model.InvoiceStatuses, "StatusID", "StatusName"), new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.InvoiceInfo.StatusID, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="invoiceListtable">
+                                    <thead class="gv_tbl_head">
+                                        <tr>
+                                            <th>
+                                                @Html.DisplayName("#")
+                                            </th>
+                                            <th>
+                                                @Html.DisplayName("Products")
+                                            </th>
+                                            <th>
+                                                @Html.DisplayName("Description")
+                                            </th>
+                                            <th>
+                                                @Html.DisplayName("Price")
+                                            </th>
+                                            <th>
+                                                @Html.DisplayName("Quantity")
+                                            </th>
+                                            <th>
+                                                @Html.DisplayName("Tax%")
+                                            </th>
+                                            <th>
+                                                @Html.DisplayName("Total")
+                                            </th>
+                                            <th class="no-sort">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="dynamictbody">
+                                        @foreach (var item in Model.InvoiceLists)
+                                        {
+                                            <tr role="row" class="odd" id="crow_@Html.DisplayFor(modelItem => item.ID)">
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.ID)
+                                                </td>
+                                                <td>
+                                                    @Html.DropDownListFor(model => item.ProductID, new SelectList(Model.Products, "ProductID", "ProductName"), new { @class = "form-control" })
+                                                    @Html.ValidationMessageFor(model => item.ProductID, "", new { @class = "text-danger" })
+                                                </td>
+                                                <td>
+                                                    @Html.TextBoxFor(modelItem => item.Description, new { @class = "form-control" })
+                                                </td>
+                                                <td>
+                                                    @Html.TextBoxFor(modelItem => item.Price, new { @class = "form-control" })
+                                                </td>
+                                                <td>
+                                                    @Html.TextBoxFor(modelItem => item.Quantity, new { @class = "form-control" })
+                                                </td>
+                                                <td>
+                                                    @Html.TextBoxFor(modelItem => item.Tax, new { @class = "form-control" })
+                                                </td>
+                                                <td>
+                                                    @((item.Price * item.Quantity).ToString("c"))
+                                                    @*@Html.DisplayFor(modelItem => item.Price * item.Quantity)*@
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-danger remove" type="button">Remove</button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                                <button class="btn btn-md btn-primary" id="addBtn" type="button" style="float: right">
+                                    ADD New
+                                </button>
+                            </div>
+
+                            <div class="row" style="align-items:center;padding-bottom: 10px">
+                                <div class="col-md-3">
+                                    @Html.Label("Invoice Note")
+                                </div>
+                                <div class="col-md-3" style="align-items:center">
+                                    @Html.TextAreaFor(model => model.InvoiceList.InvoiceNote, new { @id = "txtInvoice", @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="row" style="align-items:center;padding-bottom: 10px">
+                                <div class="col-md-3">
+                                    @Html.Label("Attachment")
+                                </div>
+                                <div class="col-md-3" style="align-items:center">
+                                    @Html.TextBoxFor(model => model.Image.ImageFile, new { type = "file" })
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="row" style="align-items:center;padding-bottom: 10px">
+                            <div class="col-md-12" style="align-items:center;left: 650px;">
+                                <input type="submit" value="Save" class="btn btn-success" />
+                                <input type="button" class="btn btn-danger" value="Cancel" onclick="@("window.location.href='" + @Url.Action("Index", "Invoice") + "'");" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</body>
+</html>
+

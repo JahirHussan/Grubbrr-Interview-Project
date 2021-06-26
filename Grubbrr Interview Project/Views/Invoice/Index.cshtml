@@ -1,0 +1,105 @@
+﻿@model IEnumerable<Grubbrr_Interview_Project.ViewModel.InvoiceListViewModel>
+@{
+    Layout = null;
+    var Message = TempData["Message"] != null ? (Grubbrr_Interview_Project.Models.Message)TempData["Message"] : null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Manage Invoice</title>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-3.3.1.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <h4 class="text-center text-uppercase">Manage Invoice</h4>
+        <div class="row" style="padding-bottom:10px;">
+            <input type="button" class="btn btn-success" style="float: right;" value="Create New" onclick="@("window.location.href='" + @Url.Action("Create", "Invoice") + "'");" />
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card card-outline-primary">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover " id="customerListtable">
+                                <thead class="gv_tbl_head">
+                                    <tr>
+                                        <th>
+                                            @Html.DisplayName("S.No")
+                                        </th>
+                                        <th>
+                                            @Html.DisplayName("Invoice No")
+                                        </th>
+                                        <th>
+                                            @Html.DisplayName("Bill To")
+                                        </th>
+                                        <th>
+                                            @Html.DisplayName("Date")
+                                        </th>
+                                        <th>
+                                            @Html.DisplayName("DueDate")
+                                        </th>
+                                        <th>
+                                            @Html.DisplayName("Status")
+                                        </th>
+                                        <th>
+                                            @Html.DisplayName("Amount")
+                                        </th>
+                                        <th class="no-sort">Action</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr role="row" class="odd" id="crow_@Html.DisplayFor(modelItem => item.listOfInvoice.InvoiceInfoID)">
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.listOfInvoice.InvoiceInfoID)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.listOfInvoice.InvoiceNumber)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.listOfInvoice.BillTo)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.listOfInvoice.InvoiceDate)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.listOfInvoice.DueDate)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.listOfInvoice.Status)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.listOfInvoice.Amount)
+                                            </td>
+                                            <td>
+                                                <a href='@Url.Action("Edit", new { id = item.listOfInvoice.InvoiceInfoID })' class="btn btn-edit btn-sm m-l-10 greenButton"><i class="ti-pencil"></i> Edit</a>
+                                                <a href='@Url.Action("Delete", new { id = item.listOfInvoice.InvoiceInfoID })' id="Delete_@item.listOfInvoice.InvoiceInfoID" class="btn btn-del btn-sm m-l-10 redButton" onclick="return deleteCustomer(event,this.id)"><i class="ti-close"></i>Delete</a>
+                                            </td>
+                                        </tr>
+                                    }
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+<script src="~/Scripts/sweetalert.init.js"></script>
+<script src="~/Custom Script/CustomerList.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/fixedheader/3.1.9/js/dataTables.fixedHeader.min.js"></script>
+<link href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="https://cdn.datatables.net/fixedheader/3.1.9/css/fixedHeader.dataTables.min.css" rel="stylesheet" />
